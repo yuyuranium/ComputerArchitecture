@@ -23,8 +23,16 @@ int *twoSum(int *numbers, int numbersSize, int target, int *returnSize) {
 }
 
 int main(void) {
-    int numbers[8] = {2, 3, 5, 7, 11, 13, 17, 19}, target = 18, returnSize;
+    int numbers[8] = {2, 3, 5, 7, 11, 13, 17, 19}, target = 18, returnSize, i;
+    printf("numbers = ");
+    for (i = 0; i < 8; ++i) {
+        printf("%d ", numbers[i]);
+    }
+    printf("\ntarget = %d\n", target);
     int *sol = twoSum(numbers, 8, target, &returnSize);
-    for (int i = 0; i < returnSize; ++i)
-        printf("%d\n", sol[i]);
+    printf("sol = ");
+    for (i = 0; i < returnSize; ++i) {
+        printf("%d ", sol[i]);
+    }
+    printf("\n");
 }

@@ -19,8 +19,7 @@ main:
 
         # print "numbers = "
         la      a0, str1
-        li      a7, 4
-        ecall
+        jal     printStr
 
         # First for loop
         li      s1, 0           # i = 0
@@ -31,14 +30,7 @@ L_for0:
         slli    t1, s1, 2
         add     t1, s0, t1
         lw      a0, 0(t1)
-        li      a7, 1
-        ecall
-
-        # Print " "
-        la      a0, ws
-        li      a7, 4
-        ecall
-
+        jal     printNum
         addi    s1, s1, 1       # ++i
 L_for0C:
         blt     s1, a1, L_for0
@@ -46,19 +38,16 @@ L_for0E:
 
         # Print "target = "
         la      a0, str2
-        li      a7, 4
-        ecall
+        jal     printStr
 
         # Print the value of target
         lw      a2, target
         mv      a0, a2
-        li      a7, 1
-        ecall
+        jal     printNum
 
         # Print "\n"
         la      a0, lf
-        li      a7, 4
-        ecall
+        jal     printStr
 
         # Call subroutine twoSum
         mv      a0, s0          # num
@@ -68,8 +57,7 @@ L_for0E:
 
         # Print "sol = "
         la      a0, str3
-        li      a7, 4
-        ecall
+        jal     printStr
 
         # Second for loop
         li      s1, 0           # i = 0
@@ -80,13 +68,7 @@ L_for1:
         slli    t2, s1, 2
         add     t2, s0, t2
         lw      a0, 0(t2)       # sol[i]
-        li      a7, 1
-        ecall
-
-        # Print " "
-        la      a0, ws
-        li      a7, 4
-        ecall
+        jal     printNum
 
         addi    s1, s1, 1       # ++i
 L_for1C:
@@ -94,8 +76,7 @@ L_for1C:
 L_for1E:
         # Print "\n"
         la      a0, lf
-        li      a7, 4
-        ecall
+        jal     printStr
         
         lw      ra, 12(sp)      # save ra
         lw      s1, 8(sp)       # num
@@ -112,34 +93,36 @@ L_for1E:
 # a3: &returnSize
 twoSum:
         addi    sp, sp, -12
-        sw      s0, 0(sp)
-        sw      s1, 4(sp)
+        sw      s0, 0(sp)       # reserve for p
+        sw      s1, 4(sp)       # reserve for q
         sw      ra, 8(sp)
 
-        # p = 0, r = numbersSize - 1
-        addi    s0, zero, 0
-        addi    s1, a1, -1
+        # p = numbers, q = &number[numbersSize - 1]
+        mv      s0, a0
+        addi    t0, a1, -1
+        slli    t0, t0, 2
+        add     s1, a0, t0
 L_while:
-        slli    t0, s0, 2
-        slli    t1, s1, 2
-        add     t0, a0, t0
-        add     t1, a0, t1
-        lw      t2, 0(t0)
-        lw      t3, 0(t1)
-        add     t4, t2, t3      # sum = numbers[p] + numbers[r]
+        lw      t2, 0(s0)
+        lw      t3, 0(s1)
+        add     t4, t2, t3      # sum = *p + *q
         bge     t4, a2, L_else0
-        addi    s0, s0, 1       # ++p
+        addi    s0, s0, 4       # ++p
         j       L_if0E
 L_else0:
         bge     a2, t4, L_else1
-        addi    s1, s1, -1      # --r
+        addi    s1, s1, -4      # --r
         j       L_if0E
 L_else1:
+        sub     t0, s0, a0      # p - numbers
+        srai    t0, t0, 2
+        addi    t0, t0, 1       # + 1
+        sub     t1, s1, a0      # q - numbers
+        srai    t1, t1, 2
+        addi    t1, t1, 1       # + 1
         la      a0, sol         # fake malloc
-        addi    t0, s0, 1       # p + 1
-        addi    t1, s1, 1       # r + 1
-        sw      t0, 0(a0)       # sol[0] = p + 1
-        sw      t1, 4(a0)       # sol[1] = r + 1
+        sw      t0, 0(a0)
+        sw      t1, 4(a0)
         li      t0, 2
         sw      t0, 0(a3)       # *returnSize = 2
 
@@ -151,3 +134,16 @@ L_else1:
         jr      ra
 L_if0E:
         j       L_while
+
+printStr:
+        li      a7, 4
+        ecall
+        ret
+
+printNum:
+        li      a7, 1
+        ecall
+        la      a0, ws
+        li      a7, 4
+        ecall
+        ret
